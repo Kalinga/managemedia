@@ -1,0 +1,7 @@
+name: managemedia 
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  # Add any additional dependencies here
+
