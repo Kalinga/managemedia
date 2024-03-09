@@ -37,7 +37,7 @@ def save_file_map(file_map, file_path):
 def main(directory, map_file):
     # Load existing file map or create an empty one
     file_map = load_file_map(map_file)
-    
+
     # If the directory has not been scanned before, build the file map
     if directory not in file_map:
         file_map[directory] = build_file_map(directory)
@@ -50,6 +50,6 @@ def main(directory, map_file):
         print(f"File: {file_path}, MD5: {md5}")
 
 if __name__ == "__main__":
-    directory_to_scan = "/path/to/directory"
+    directory_to_scan = "/mnt/4Tnas/Seagate-Portable-01"
     file_map_file = "file_map.json"
     main(directory_to_scan, file_map_file)
