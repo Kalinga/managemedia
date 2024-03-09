@@ -8,6 +8,9 @@ import logging
 logging.basicConfig(filename='duplicate_files.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+scanned_directories = set()
+duplicate_files = []
+
 
 def get_file_checksum(file_path):
     # Calculate the checksum of a file
@@ -21,21 +24,25 @@ def get_file_checksum(file_path):
     return hasher.hexdigest()
 
 
-def find_duplicate_files(directory, scanned_directories):
+def find_duplicate_files(directory):
+    global scanned_directories, duplicate_files
+
     # Find duplicate files in the specified directory
     file_info = {}
-    duplicate_files = []
 
     for root, dirs, files in os.walk(directory):
         logging.info(f"Scanning directory: {root}")
-        if root in scanned_directories:
-            continue  # Skip already scanned directories
+        if root == directory:
+            # Skip adding the initial directory to scanned_directories
+            continue
+
         for filename in files:
             file_path = os.path.join(root, filename)
             file_size = os.path.getsize(file_path)
             checksum = get_file_checksum(file_path)
             if (file_size, checksum) in file_info:
-                duplicate_files.append(file_path)
+                original_file_path = file_info[(file_size, checksum)]
+                duplicate_files.append((original_file_path, file_path))
                 logging.info(f"Duplicate file found: {file_path}")
             else:
                 file_info[(file_size, checksum)] = file_path
@@ -43,16 +50,17 @@ def find_duplicate_files(directory, scanned_directories):
 
         logging.info(f"Finished scanning directory: {root}")
 
-    # Update scanned directories list
-    scanned_directories.add(directory)
+        # Add the directory to scanned_directories after all files in the directory have been processed
+        if root != directory:
+            scanned_directories.add(root)
 
-    return duplicate_files, scanned_directories
 
+def save_data_to_json(output_file):
+    global scanned_directories, duplicate_files
 
-def save_data_to_json(data, output_file):
     # Save data to JSON file
     with open(output_file, 'w') as f:
-        json.dump(data, f, indent=4)
+        json.dump({"scanned_directories": list(scanned_directories), "duplicate_files": duplicate_files}, f, indent=4)
 
 
 def load_data_from_json(input_file):
@@ -64,9 +72,10 @@ def load_data_from_json(input_file):
 
 
 def signal_handler(sig, frame):
+    global scanned_directories, duplicate_files
+
     print("\nInterrupt received. Saving scanned directories and duplicate files...")
-    save_data_to_json({"scanned_directories": list(scanned_directories), "duplicate_files": duplicate_files},
-                      output_file)
+    save_data_to_json(output_file)
     print("Scanned directories and duplicate files saved successfully.")
     logging.info("Scanned directories and duplicate files saved successfully.")
     sys.exit(0)
@@ -85,19 +94,15 @@ if __name__ == "__main__":
     duplicate_files = data.get("duplicate_files", [])
 
     # Start scanning from the initial start directory
-    new_duplicate_files, scanned_directories = find_duplicate_files(start_directory, scanned_directories)
-    duplicate_files.extend(new_duplicate_files)
+    find_duplicate_files(start_directory)
 
-    if new_duplicate_files:
+    if duplicate_files:
         print("Duplicate files found:")
-        for file_path in new_duplicate_files:
+        for file_path in duplicate_files:
             print(file_path)
 
         # Save details of duplicate files and scanned directories to JSON file
-        save_data_to_json({"scanned_directories": list(scanned_directories), "duplicate_files": duplicate_files},
-                          output_file)
+        save_data_to_json(output_file)
         print("Details of duplicate files saved to 'duplicate_files.json'.")
     else:
         print("No duplicate files found in the specified directory.")
-
-
