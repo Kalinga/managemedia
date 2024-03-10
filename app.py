@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 
 app = Flask(__name__)
 
@@ -11,7 +11,7 @@ def update_duplicate_files(files_to_delete):
         updated_data = {"duplicate_files": []}
         for files_pair in data["duplicate_files"]:
             updated_pair = [file_path for file_path in files_pair if file_path not in files_to_delete]
-            if len(updated_pair) == 2:  # Only add if both files still exist
+            if len(updated_pair) > 0:  # Only add if at least one file still exists
                 updated_data["duplicate_files"].append(updated_pair)
 
     with open('duplicate_files.json', 'w') as f:
@@ -35,6 +35,12 @@ def index():
         with open('duplicate_files.json', 'r') as f:
             duplicate_files = json.load(f).get("duplicate_files", [])
         return render_template('index.html', duplicate_files=duplicate_files)
+
+# Route to serve the file
+@app.route('/file/<path:file_path>')
+def serve_file(file_path):
+    full_file_path = '/' + file_path  # Prepend the missing path
+    return send_from_directory(os.path.dirname(full_file_path), os.path.basename(full_file_path))
 
 if __name__ == '__main__':
     app.run(debug=True)

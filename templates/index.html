@@ -22,9 +22,13 @@
         }
         .original-file {
             color: #007bff; /* Color for original file paths */
+            text-decoration: underline; /* Underline original file paths */
+            cursor: pointer; /* Show pointer cursor on hover */
         }
         .duplicate-file {
             color: #dc3545; /* Color for duplicate file paths */
+            text-decoration: underline; /* Underline duplicate file paths */
+            cursor: pointer; /* Show pointer cursor on hover */
         }
     </style>
 </head>
@@ -37,7 +41,7 @@
             <label class="checkbox-label">
                 <input type="checkbox" name="file_to_delete[]" value="{{ file_path }}">
             </label>
-            <span class="{% if loop.index == 1 %}original-file{% else %}duplicate-file{% endif %}">{{ file_path }}</span>
+            <a href="/file/{{ file_path }}" target="_blank" class="{% if loop.index == 1 %}original-file{% else %}duplicate-file{% endif %}">{{ file_path }}</a>
             <br>
             {% endfor %}
         </div>
