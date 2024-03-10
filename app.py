@@ -1,9 +1,10 @@
+import os
 import json
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-# Function to read and update the duplicate_file.json file
+# Function to read and update the duplicate_files.json file
 def update_duplicate_files(files_to_delete):
     with open('duplicate_files.json', 'r') as f:
         data = json.load(f)
@@ -21,8 +22,14 @@ def update_duplicate_files(files_to_delete):
 def index():
     if request.method == 'POST':
         files_to_delete = request.form.getlist('file_to_delete[]')
-        # Add your code to delete the files here
-        update_duplicate_files(files_to_delete)
+        deleted_files = []
+        for file_path in files_to_delete:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                deleted_files.append(file_path)
+            else:
+                print(f"File not found: {file_path}")  # Log the error
+        update_duplicate_files(deleted_files)
         return redirect(url_for('index'))  # Redirect to index after deletion
     else:
         with open('duplicate_files.json', 'r') as f:
