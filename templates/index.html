@@ -4,18 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duplicate Files</title>
+    <style>
+        body {
+            font-size: 18px; /* Increase font size */
+            color: #333; /* Default text color */
+        }
+        .file-pair {
+            margin-bottom: 20px;
+        }
+        .checkbox-label {
+            margin-right: 10px;
+        }
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 5px;
+            width: 20px; /* Larger checkboxes */
+            height: 20px; /* Larger checkboxes */
+        }
+        .original-file {
+            color: #007bff; /* Color for original file paths */
+        }
+        .duplicate-file {
+            color: #dc3545; /* Color for duplicate file paths */
+        }
+    </style>
 </head>
 <body>
     <h1>Duplicate Files</h1>
     <form action="/" method="post">
         {% for files_pair in duplicate_files %}
-        <div>
-            <input type="checkbox" name="file_to_delete[]" value="{{ files_pair[0] }}">
-            <label>{{ files_pair[0] }}</label>
+        <div class="file-pair">
+            {% for file_path in files_pair %}
+            <label class="checkbox-label">
+                <input type="checkbox" name="file_to_delete[]" value="{{ file_path }}">
+            </label>
+            <span class="{% if loop.index == 1 %}original-file{% else %}duplicate-file{% endif %}">{{ file_path }}</span>
             <br>
-            <input type="checkbox" name="file_to_delete[]" value="{{ files_pair[1] }}">
-            <label>{{ files_pair[1] }}</label>
-            <br><br>
+            {% endfor %}
         </div>
         {% endfor %}
         <button type="submit">Delete Selected Files</button>
