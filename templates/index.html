@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Files</title>
+</head>
+<body>
+    <h1>Duplicate Files</h1>
+    <form action="/" method="post">
+        {% for files_pair in duplicate_files %}
+        <div>
+            <input type="checkbox" name="file_to_delete[]" value="{{ files_pair[0] }}">
+            <label>{{ files_pair[0] }}</label>
+            <br>
+            <input type="checkbox" name="file_to_delete[]" value="{{ files_pair[1] }}">
+            <label>{{ files_pair[1] }}</label>
+            <br><br>
+        </div>
+        {% endfor %}
+        <button type="submit">Delete Selected Files</button>
+    </form>
+</body>
+</html>

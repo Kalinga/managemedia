@@ -3,5 +3,6 @@ channels:
   - defaults
 dependencies:
   - python=3.12
+  - flask=2.2.5
   # Add any additional dependencies here
 

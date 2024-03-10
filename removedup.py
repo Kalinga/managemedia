@@ -32,9 +32,9 @@ def find_duplicate_files(directory):
 
     for root, dirs, files in os.walk(directory):
         logging.info(f"Scanning directory: {root}")
-        if root == directory:
-            # Skip adding the initial directory to scanned_directories
-            continue
+        if root in scanned_directories:
+            logging.info(f"Already scanned skip.. : {root}")
+            continue  # Skip already scanned directories
 
         for filename in files:
             file_path = os.path.join(root, filename)
