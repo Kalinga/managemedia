@@ -65,7 +65,7 @@ def save_data_to_json(output_file):
     file_info_converted = convert_tuple_to_list(file_info)
 
     # Save data to JSON file
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w') as f:+
         json.dump({"scanned_directories": list(scanned_directories), "duplicate_files": duplicate_files, "file_info": file_info_converted}, f, indent=4)
 
 def load_data_from_json(input_file):
