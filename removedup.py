@@ -53,27 +53,44 @@ def find_duplicate_files(directory):
         if root != directory:
             scanned_directories.add(root)
 
+def convert_tuple_to_list(data):
+    # Convert tuples to lists in the dictionary keys
+    converted_data = {str(key): value for key, value in data.items()}
+    return converted_data
 
 def save_data_to_json(output_file):
     global scanned_directories, duplicate_files, file_info
 
+    # Convert tuples in file_info to lists
+    file_info_converted = convert_tuple_to_list(file_info)
+
     # Save data to JSON file
     with open(output_file, 'w') as f:
-        json.dump({"scanned_directories": list(scanned_directories), "duplicate_files": duplicate_files, "file_info": file_info}, f, indent=4)
-
+        json.dump({"scanned_directories": list(scanned_directories), "duplicate_files": duplicate_files, "file_info": file_info_converted}, f, indent=4)
 
 def load_data_from_json(input_file):
+    global scanned_directories, duplicate_files, file_info
+
     # Load data from JSON file
-    if os.path.exists(input_file):
-        with open(input_file, 'r') as f:
-            data = json.load(f)
-            scanned_directories = set(data.get("scanned_directories", []))
-            duplicate_files = data.get("duplicate_files", [])
-            file_info = data.get("file_info", {})
-    else:
+    try:
+        if os.path.exists(input_file):
+            with open(input_file, 'r') as f:
+                data = json.load(f)
+                scanned_directories = set(data.get("scanned_directories", []))
+                duplicate_files = data.get("duplicate_files", [])
+                file_info_data = data.get("file_info", {})
+                # Populate file_info dictionary with correct format
+                file_info = {eval(key): value for key, value in file_info_data.items()}
+        else:
+            scanned_directories = set()
+            duplicate_files = []
+            file_info = {}
+    except json.JSONDecodeError as e:
+        logging.error(f"Error decoding JSON from {input_file}: {e}")
         scanned_directories = set()
         duplicate_files = []
         file_info = {}
+
 
 
 def signal_handler(sig, frame):
@@ -90,7 +107,11 @@ if __name__ == "__main__":
     # Set up interrupt handler
     signal.signal(signal.SIGINT, signal_handler)
 
-    start_directory = input("Enter the initial start directory to scan for duplicate files: ")
+    # Get start directory from environment variable or prompt user
+    start_directory = os.getenv("START_DIRECTORY")
+    if not start_directory:
+        start_directory = input("Enter the initial start directory to scan for duplicate files: ")
+
     output_file = "duplicate_files.json"
 
     # Load scanned directories, duplicate files, and file info from previous run
